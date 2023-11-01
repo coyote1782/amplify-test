@@ -1,5 +1,111 @@
 export const schema = {
     "models": {
+        "People": {
+            "name": "People",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "name": {
+                    "name": "name",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "sex": {
+                    "name": "sex",
+                    "isArray": false,
+                    "type": {
+                        "enum": "Sex"
+                    },
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "homeID": {
+                    "name": "homeID",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "Home": {
+                    "name": "Home",
+                    "isArray": false,
+                    "type": {
+                        "model": "Home"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "homeID"
+                        ]
+                    }
+                },
+                "image": {
+                    "name": "image",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "People",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byHome",
+                        "fields": [
+                            "homeID"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "allow": "public",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
         "Home": {
             "name": "Home",
             "fields": {
@@ -38,6 +144,22 @@ export const schema = {
                     "isRequired": false,
                     "attributes": [],
                     "isArrayNullable": true
+                },
+                "People": {
+                    "name": "People",
+                    "isArray": true,
+                    "type": {
+                        "model": "People"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "Home"
+                        ]
+                    }
                 },
                 "createdAt": {
                     "name": "createdAt",
@@ -82,8 +204,17 @@ export const schema = {
             ]
         }
     },
-    "enums": {},
+    "enums": {
+        "Sex": {
+            "name": "Sex",
+            "values": [
+                "MALE",
+                "FEMALE",
+                "OTHER"
+            ]
+        }
+    },
     "nonModels": {},
     "codegenVersion": "3.4.4",
-    "version": "26c61f57a4935269e760b7406c4f50cc"
+    "version": "d941e8b7d1b6e6ffd7d399b8a4b11b1c"
 };

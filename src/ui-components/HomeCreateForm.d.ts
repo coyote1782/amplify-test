@@ -5,8 +5,18 @@
  **************************************************************************/
 
 import * as React from "react";
-import { GridProps, TextFieldProps } from "@aws-amplify/ui-react";
-import { EscapeHatchProps } from "@aws-amplify/ui-react/internal";
+import { AutocompleteProps, GridProps, TextFieldProps } from "@aws-amplify/ui-react";
+import { People as People0 } from "../models";
+export declare type EscapeHatchProps = {
+    [elementHierarchy: string]: Record<string, unknown>;
+} | null;
+export declare type VariantValues = {
+    [key: string]: string;
+};
+export declare type Variant = {
+    variantValues: VariantValues;
+    overrides: EscapeHatchProps;
+};
 export declare type ValidationResponse = {
     hasError: boolean;
     errorMessage?: string;
@@ -17,12 +27,14 @@ export declare type HomeCreateFormInputValues = {
     price?: number;
     image_url?: string;
     tags?: string[];
+    People?: People0[];
 };
 export declare type HomeCreateFormValidationValues = {
     address?: ValidationFunction<string>;
     price?: ValidationFunction<number>;
     image_url?: ValidationFunction<string>;
     tags?: ValidationFunction<string>;
+    People?: ValidationFunction<People0>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type HomeCreateFormOverridesProps = {
@@ -31,6 +43,7 @@ export declare type HomeCreateFormOverridesProps = {
     price?: PrimitiveOverrideProps<TextFieldProps>;
     image_url?: PrimitiveOverrideProps<TextFieldProps>;
     tags?: PrimitiveOverrideProps<TextFieldProps>;
+    People?: PrimitiveOverrideProps<AutocompleteProps>;
 } & EscapeHatchProps;
 export declare type HomeCreateFormProps = React.PropsWithChildren<{
     overrides?: HomeCreateFormOverridesProps | undefined | null;

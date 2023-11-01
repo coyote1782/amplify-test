@@ -6,7 +6,7 @@
 
 /* eslint-disable */
 import * as React from "react";
-import { getOverrideProps } from "@aws-amplify/ui-react/internal";
+import { getOverrideProps } from "./utils";
 import { Button, Flex, Text, TextField } from "@aws-amplify/ui-react";
 export default function CTASection(props) {
   const { overrides, ...rest } = props;
@@ -54,7 +54,7 @@ export default function CTASection(props) {
             fontFamily="Inter"
             fontSize="16px"
             fontWeight="700"
-            color="rgba(191,64,191,1)"
+            color="rgba(64,170,191,1)"
             lineHeight="24px"
             textAlign="left"
             display="block"

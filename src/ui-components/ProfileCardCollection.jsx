@@ -6,21 +6,16 @@
 
 /* eslint-disable */
 import * as React from "react";
-import { Home } from "../models";
-import { SortDirection } from "@aws-amplify/datastore";
+import { People } from "../models";
 import { getOverrideProps, useDataStoreBinding } from "./utils";
-import ActionCard from "./ActionCard";
+import ProfileCard from "./ProfileCard";
 import { Collection } from "@aws-amplify/ui-react";
-export default function NewHome(props) {
+export default function ProfileCardCollection(props) {
   const { items: itemsProp, overrideItems, overrides, ...rest } = props;
-  const itemsPagination = {
-    sort: (s) => s.createdAt(SortDirection.DESCENDING),
-  };
   const [items, setItems] = React.useState(undefined);
   const itemsDataStore = useDataStoreBinding({
     type: "collection",
-    model: Home,
-    pagination: itemsPagination,
+    model: People,
   }).items;
   React.useEffect(() => {
     if (itemsProp !== undefined) {
@@ -31,7 +26,7 @@ export default function NewHome(props) {
       var loaded = await Promise.all(
         itemsDataStore.map(async (item) => ({
           ...item,
-          People: await item.People.toArray(),
+          Home: await item.Home,
         }))
       );
       setItems(loaded);
@@ -41,26 +36,24 @@ export default function NewHome(props) {
   return (
     <Collection
       type="grid"
-      isSearchable="true"
       searchPlaceholder="Search..."
-      itemsPerPage={6}
       templateColumns="1fr 1fr"
       autoFlow="row"
       alignItems="stretch"
       justifyContent="stretch"
       items={items || []}
-      {...getOverrideProps(overrides, "NewHome")}
+      {...getOverrideProps(overrides, "ProfileCardCollection")}
       {...rest}
     >
       {(item, index) => (
-        <ActionCard
-          home={item}
+        <ProfileCard
+          people={item}
           height="auto"
           width="auto"
           margin="10px 10px 10px 10px"
           key={item.id}
           {...(overrideItems && overrideItems({ item, index }))}
-        ></ActionCard>
+        ></ProfileCard>
       )}
     </Collection>
   );

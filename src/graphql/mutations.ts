@@ -8,6 +8,159 @@ type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationOutput: OutputType;
 };
 
+export const createPeople = /* GraphQL */ `mutation CreatePeople(
+  $input: CreatePeopleInput!
+  $condition: ModelPeopleConditionInput
+) {
+  createPeople(input: $input, condition: $condition) {
+    id
+    name
+    sex
+    homeID
+    Home {
+      id
+      address
+      price
+      image_url
+      tags
+      People {
+        items {
+          id
+          name
+          sex
+          homeID
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreatePeopleMutationVariables,
+  APITypes.CreatePeopleMutation
+>;
+export const updatePeople = /* GraphQL */ `mutation UpdatePeople(
+  $input: UpdatePeopleInput!
+  $condition: ModelPeopleConditionInput
+) {
+  updatePeople(input: $input, condition: $condition) {
+    id
+    name
+    sex
+    homeID
+    Home {
+      id
+      address
+      price
+      image_url
+      tags
+      People {
+        items {
+          id
+          name
+          sex
+          homeID
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdatePeopleMutationVariables,
+  APITypes.UpdatePeopleMutation
+>;
+export const deletePeople = /* GraphQL */ `mutation DeletePeople(
+  $input: DeletePeopleInput!
+  $condition: ModelPeopleConditionInput
+) {
+  deletePeople(input: $input, condition: $condition) {
+    id
+    name
+    sex
+    homeID
+    Home {
+      id
+      address
+      price
+      image_url
+      tags
+      People {
+        items {
+          id
+          name
+          sex
+          homeID
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeletePeopleMutationVariables,
+  APITypes.DeletePeopleMutation
+>;
 export const createHome = /* GraphQL */ `mutation CreateHome(
   $input: CreateHomeInput!
   $condition: ModelHomeConditionInput
@@ -17,6 +170,37 @@ export const createHome = /* GraphQL */ `mutation CreateHome(
     address
     price
     image_url
+    tags
+    People {
+      items {
+        id
+        name
+        sex
+        homeID
+        Home {
+          id
+          address
+          price
+          image_url
+          tags
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -38,6 +222,37 @@ export const updateHome = /* GraphQL */ `mutation UpdateHome(
     address
     price
     image_url
+    tags
+    People {
+      items {
+        id
+        name
+        sex
+        homeID
+        Home {
+          id
+          address
+          price
+          image_url
+          tags
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -59,6 +274,37 @@ export const deleteHome = /* GraphQL */ `mutation DeleteHome(
     address
     price
     image_url
+    tags
+    People {
+      items {
+        id
+        name
+        sex
+        homeID
+        Home {
+          id
+          address
+          price
+          image_url
+          tags
+          createdAt
+          updatedAt
+          _version
+          _deleted
+          _lastChangedAt
+          __typename
+        }
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version

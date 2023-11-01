@@ -5,7 +5,7 @@
  **************************************************************************/
 
 import * as React from "react";
-import { ActionCardProps } from "./ActionCard";
+import { ProfileCardProps } from "./ProfileCard";
 import { CollectionProps } from "@aws-amplify/ui-react";
 export declare type EscapeHatchProps = {
     [elementHierarchy: string]: Record<string, unknown>;
@@ -18,17 +18,17 @@ export declare type Variant = {
     overrides: EscapeHatchProps;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
-export declare type NewHomeOverridesProps = {
-    NewHome?: PrimitiveOverrideProps<CollectionProps>;
-    ActionCard?: ActionCardProps;
+export declare type ProfileCardCollectionOverridesProps = {
+    ProfileCardCollection?: PrimitiveOverrideProps<CollectionProps>;
+    ProfileCard?: ProfileCardProps;
 } & EscapeHatchProps;
-export declare type NewHomeProps = React.PropsWithChildren<Partial<CollectionProps<any>> & {
+export declare type ProfileCardCollectionProps = React.PropsWithChildren<Partial<CollectionProps<any>> & {
     items?: any[];
     overrideItems?: (collectionItem: {
         item: any;
         index: number;
-    }) => ActionCardProps;
+    }) => ProfileCardProps;
 } & {
-    overrides?: NewHomeOverridesProps | undefined | null;
+    overrides?: ProfileCardCollectionOverridesProps | undefined | null;
 }>;
-export default function NewHome(props: NewHomeProps): React.ReactElement;
+export default function ProfileCardCollection(props: ProfileCardCollectionProps): React.ReactElement;

@@ -6,7 +6,7 @@
 
 /* eslint-disable */
 import * as React from "react";
-import { getOverrideProps } from "@aws-amplify/ui-react/internal";
+import { getOverrideProps } from "./utils";
 import { Button, Flex, Text, TextField } from "@aws-amplify/ui-react";
 import LogoWithText from "./LogoWithText";
 export default function MarketingFooterBrand(props) {
@@ -21,7 +21,7 @@ export default function MarketingFooterBrand(props) {
       alignItems="center"
       position="relative"
       padding="40px 40px 40px 40px"
-      backgroundColor="rgba(233,249,252,1)"
+      backgroundColor="rgba(230,238,254,1)"
       {...getOverrideProps(overrides, "MarketingFooterBrand")}
       {...rest}
     >
@@ -179,7 +179,7 @@ export default function MarketingFooterBrand(props) {
             fontFamily="Inter"
             fontSize="16px"
             fontWeight="400"
-            color="rgba(4,125,149,1)"
+            color="rgba(4,52,149,1)"
             lineHeight="24px"
             textAlign="left"
             display="block"
@@ -201,7 +201,7 @@ export default function MarketingFooterBrand(props) {
             fontFamily="Inter"
             fontSize="16px"
             fontWeight="400"
-            color="rgba(4,125,149,1)"
+            color="rgba(4,52,149,1)"
             lineHeight="24px"
             textAlign="left"
             display="block"
@@ -223,7 +223,7 @@ export default function MarketingFooterBrand(props) {
             fontFamily="Inter"
             fontSize="16px"
             fontWeight="400"
-            color="rgba(4,125,149,1)"
+            color="rgba(4,52,149,1)"
             lineHeight="24px"
             textAlign="left"
             display="block"
@@ -245,7 +245,7 @@ export default function MarketingFooterBrand(props) {
             fontFamily="Inter"
             fontSize="16px"
             fontWeight="400"
-            color="rgba(4,125,149,1)"
+            color="rgba(4,52,149,1)"
             lineHeight="24px"
             textAlign="left"
             display="block"
@@ -302,7 +302,7 @@ export default function MarketingFooterBrand(props) {
             fontFamily="Inter"
             fontSize="16px"
             fontWeight="400"
-            color="rgba(4,125,149,1)"
+            color="rgba(4,52,149,1)"
             lineHeight="24px"
             textAlign="left"
             display="block"
@@ -324,7 +324,7 @@ export default function MarketingFooterBrand(props) {
             fontFamily="Inter"
             fontSize="16px"
             fontWeight="400"
-            color="rgba(4,125,149,1)"
+            color="rgba(4,52,149,1)"
             lineHeight="24px"
             textAlign="left"
             display="block"
@@ -346,7 +346,7 @@ export default function MarketingFooterBrand(props) {
             fontFamily="Inter"
             fontSize="16px"
             fontWeight="400"
-            color="rgba(4,125,149,1)"
+            color="rgba(4,52,149,1)"
             lineHeight="24px"
             textAlign="left"
             display="block"
@@ -368,7 +368,7 @@ export default function MarketingFooterBrand(props) {
             fontFamily="Inter"
             fontSize="16px"
             fontWeight="400"
-            color="rgba(4,125,149,1)"
+            color="rgba(4,52,149,1)"
             lineHeight="24px"
             textAlign="left"
             display="block"
@@ -425,7 +425,7 @@ export default function MarketingFooterBrand(props) {
             fontFamily="Inter"
             fontSize="16px"
             fontWeight="400"
-            color="rgba(4,125,149,1)"
+            color="rgba(4,52,149,1)"
             lineHeight="24px"
             textAlign="left"
             display="block"
@@ -447,7 +447,7 @@ export default function MarketingFooterBrand(props) {
             fontFamily="Inter"
             fontSize="16px"
             fontWeight="400"
-            color="rgba(4,125,149,1)"
+            color="rgba(4,52,149,1)"
             lineHeight="24px"
             textAlign="left"
             display="block"
@@ -469,7 +469,7 @@ export default function MarketingFooterBrand(props) {
             fontFamily="Inter"
             fontSize="16px"
             fontWeight="400"
-            color="rgba(4,125,149,1)"
+            color="rgba(4,52,149,1)"
             lineHeight="24px"
             textAlign="left"
             display="block"

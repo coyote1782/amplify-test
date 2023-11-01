@@ -15,11 +15,12 @@ import {
   Grid,
   Icon,
   ScrollView,
+  SelectField,
   Text,
   TextField,
   useTheme,
 } from "@aws-amplify/ui-react";
-import { Home, People as People0 } from "../models";
+import { People, Home as Home0 } from "../models";
 import {
   fetchByPath,
   getOverrideProps,
@@ -182,9 +183,10 @@ function ArrayField({
     </React.Fragment>
   );
 }
-export default function HomeCreateForm(props) {
+export default function PeopleUpdateForm(props) {
   const {
-    clearOnSuccess = true,
+    id: idProp,
+    people: peopleModelProp,
     onSuccess,
     onError,
     onSubmit,
@@ -193,58 +195,66 @@ export default function HomeCreateForm(props) {
     overrides,
     ...rest
   } = props;
-  const { tokens } = useTheme();
   const initialValues = {
-    address: "",
-    price: "",
-    image_url: "",
-    tags: [],
-    People: [],
+    name: "",
+    sex: "",
+    Home: undefined,
+    image: "",
   };
-  const [address, setAddress] = React.useState(initialValues.address);
-  const [price, setPrice] = React.useState(initialValues.price);
-  const [image_url, setImage_url] = React.useState(initialValues.image_url);
-  const [tags, setTags] = React.useState(initialValues.tags);
-  const [People, setPeople] = React.useState(initialValues.People);
+  const [name, setName] = React.useState(initialValues.name);
+  const [sex, setSex] = React.useState(initialValues.sex);
+  const [Home, setHome] = React.useState(initialValues.Home);
+  const [image, setImage] = React.useState(initialValues.image);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
-    setAddress(initialValues.address);
-    setPrice(initialValues.price);
-    setImage_url(initialValues.image_url);
-    setTags(initialValues.tags);
-    setCurrentTagsValue("");
-    setPeople(initialValues.People);
-    setCurrentPeopleValue(undefined);
-    setCurrentPeopleDisplayValue("");
+    const cleanValues = peopleRecord
+      ? { ...initialValues, ...peopleRecord, Home }
+      : initialValues;
+    setName(cleanValues.name);
+    setSex(cleanValues.sex);
+    setHome(cleanValues.Home);
+    setCurrentHomeValue(undefined);
+    setCurrentHomeDisplayValue("");
+    setImage(cleanValues.image);
     setErrors({});
   };
-  const [currentTagsValue, setCurrentTagsValue] = React.useState("");
-  const tagsRef = React.createRef();
-  const [currentPeopleDisplayValue, setCurrentPeopleDisplayValue] =
+  const [peopleRecord, setPeopleRecord] = React.useState(peopleModelProp);
+  React.useEffect(() => {
+    const queryData = async () => {
+      const record = idProp
+        ? await DataStore.query(People, idProp)
+        : peopleModelProp;
+      setPeopleRecord(record);
+      const HomeRecord = record ? await record.Home : undefined;
+      setHome(HomeRecord);
+    };
+    queryData();
+  }, [idProp, peopleModelProp]);
+  React.useEffect(resetStateValues, [peopleRecord, Home]);
+  const [currentHomeDisplayValue, setCurrentHomeDisplayValue] =
     React.useState("");
-  const [currentPeopleValue, setCurrentPeopleValue] = React.useState(undefined);
-  const PeopleRef = React.createRef();
+  const [currentHomeValue, setCurrentHomeValue] = React.useState(undefined);
+  const HomeRef = React.createRef();
   const getIDValue = {
-    People: (r) => JSON.stringify({ id: r?.id }),
+    Home: (r) => JSON.stringify({ id: r?.id }),
   };
-  const PeopleIdSet = new Set(
-    Array.isArray(People)
-      ? People.map((r) => getIDValue.People?.(r))
-      : getIDValue.People?.(People)
+  const HomeIdSet = new Set(
+    Array.isArray(Home)
+      ? Home.map((r) => getIDValue.Home?.(r))
+      : getIDValue.Home?.(Home)
   );
-  const peopleRecords = useDataStoreBinding({
+  const homeRecords = useDataStoreBinding({
     type: "collection",
-    model: People0,
+    model: Home0,
   }).items;
   const getDisplayValue = {
-    People: (r) => `${r?.name ? r?.name + " - " : ""}${r?.id}`,
+    Home: (r) => `${r?.address ? r?.address + " - " : ""}${r?.id}`,
   };
   const validations = {
-    address: [],
-    price: [],
-    image_url: [],
-    tags: [],
-    People: [],
+    name: [],
+    sex: [],
+    Home: [],
+    image: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -267,16 +277,15 @@ export default function HomeCreateForm(props) {
     <Grid
       as="form"
       rowGap="15px"
-      columnGap={tokens.space.medium.value}
+      columnGap="15px"
       padding="20px"
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
-          address,
-          price,
-          image_url,
-          tags,
-          People,
+          name,
+          sex,
+          Home,
+          image,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -314,32 +323,16 @@ export default function HomeCreateForm(props) {
               modelFields[key] = null;
             }
           });
-          const modelFieldsToSave = {
-            address: modelFields.address,
-            price: modelFields.price,
-            image_url: modelFields.image_url,
-            tags: modelFields.tags,
-          };
-          const home = await DataStore.save(new Home(modelFieldsToSave));
-          const promises = [];
-          promises.push(
-            ...People.reduce((promises, original) => {
-              promises.push(
-                DataStore.save(
-                  People.copyOf(original, (updated) => {
-                    updated.Home = home;
-                  })
-                )
-              );
-              return promises;
-            }, [])
+          await DataStore.save(
+            People.copyOf(peopleRecord, (updated) => {
+              Object.assign(updated, modelFields);
+              if (!modelFields.Home) {
+                updated.homeID = undefined;
+              }
+            })
           );
-          await Promise.all(promises);
           if (onSuccess) {
             onSuccess(modelFields);
-          }
-          if (clearOnSuccess) {
-            resetStateValues();
           }
         } catch (err) {
           if (onError) {
@@ -347,246 +340,209 @@ export default function HomeCreateForm(props) {
           }
         }
       }}
-      {...getOverrideProps(overrides, "HomeCreateForm")}
+      {...getOverrideProps(overrides, "PeopleUpdateForm")}
       {...rest}
     >
       <TextField
-        label="Address"
+        label="Name"
         isRequired={false}
         isReadOnly={false}
-        value={address}
+        value={name}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              address: value,
-              price,
-              image_url,
-              tags,
-              People,
+              name: value,
+              sex,
+              Home,
+              image,
             };
             const result = onChange(modelFields);
-            value = result?.address ?? value;
+            value = result?.name ?? value;
           }
-          if (errors.address?.hasError) {
-            runValidationTasks("address", value);
+          if (errors.name?.hasError) {
+            runValidationTasks("name", value);
           }
-          setAddress(value);
+          setName(value);
         }}
-        onBlur={() => runValidationTasks("address", address)}
-        errorMessage={errors.address?.errorMessage}
-        hasError={errors.address?.hasError}
-        {...getOverrideProps(overrides, "address")}
+        onBlur={() => runValidationTasks("name", name)}
+        errorMessage={errors.name?.errorMessage}
+        hasError={errors.name?.hasError}
+        {...getOverrideProps(overrides, "name")}
       ></TextField>
-      <TextField
-        label="Price"
-        isRequired={false}
-        isReadOnly={false}
-        type="number"
-        step="any"
-        value={price}
-        onChange={(e) => {
-          let value = isNaN(parseFloat(e.target.value))
-            ? e.target.value
-            : parseFloat(e.target.value);
-          if (onChange) {
-            const modelFields = {
-              address,
-              price: value,
-              image_url,
-              tags,
-              People,
-            };
-            const result = onChange(modelFields);
-            value = result?.price ?? value;
-          }
-          if (errors.price?.hasError) {
-            runValidationTasks("price", value);
-          }
-          setPrice(value);
-        }}
-        onBlur={() => runValidationTasks("price", price)}
-        errorMessage={errors.price?.errorMessage}
-        hasError={errors.price?.hasError}
-        {...getOverrideProps(overrides, "price")}
-      ></TextField>
-      <TextField
-        label="Image url"
-        isRequired={false}
-        isReadOnly={false}
-        value={image_url}
+      <SelectField
+        label="Sex"
+        placeholder="Please select an option"
+        isDisabled={false}
+        value={sex}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              address,
-              price,
-              image_url: value,
-              tags,
-              People,
+              name,
+              sex: value,
+              Home,
+              image,
             };
             const result = onChange(modelFields);
-            value = result?.image_url ?? value;
+            value = result?.sex ?? value;
           }
-          if (errors.image_url?.hasError) {
-            runValidationTasks("image_url", value);
+          if (errors.sex?.hasError) {
+            runValidationTasks("sex", value);
           }
-          setImage_url(value);
+          setSex(value);
         }}
-        onBlur={() => runValidationTasks("image_url", image_url)}
-        errorMessage={errors.image_url?.errorMessage}
-        hasError={errors.image_url?.hasError}
-        {...getOverrideProps(overrides, "image_url")}
-      ></TextField>
-      <ArrayField
-        onChange={async (items) => {
-          let values = items;
-          if (onChange) {
-            const modelFields = {
-              address,
-              price,
-              image_url,
-              tags: values,
-              People,
-            };
-            const result = onChange(modelFields);
-            values = result?.tags ?? values;
-          }
-          setTags(values);
-          setCurrentTagsValue("");
-        }}
-        currentFieldValue={currentTagsValue}
-        label={"Tags"}
-        items={tags}
-        hasError={errors?.tags?.hasError}
-        runValidationTasks={async () =>
-          await runValidationTasks("tags", currentTagsValue)
-        }
-        errorMessage={errors?.tags?.errorMessage}
-        setFieldValue={setCurrentTagsValue}
-        inputFieldRef={tagsRef}
-        defaultFieldValue={""}
+        onBlur={() => runValidationTasks("sex", sex)}
+        errorMessage={errors.sex?.errorMessage}
+        hasError={errors.sex?.hasError}
+        {...getOverrideProps(overrides, "sex")}
       >
-        <TextField
-          label="Tags"
-          isRequired={false}
-          isReadOnly={false}
-          value={currentTagsValue}
-          onChange={(e) => {
-            let { value } = e.target;
-            if (errors.tags?.hasError) {
-              runValidationTasks("tags", value);
-            }
-            setCurrentTagsValue(value);
-          }}
-          onBlur={() => runValidationTasks("tags", currentTagsValue)}
-          errorMessage={errors.tags?.errorMessage}
-          hasError={errors.tags?.hasError}
-          ref={tagsRef}
-          labelHidden={true}
-          {...getOverrideProps(overrides, "tags")}
-        ></TextField>
-      </ArrayField>
+        <option
+          children="Male"
+          value="MALE"
+          {...getOverrideProps(overrides, "sexoption0")}
+        ></option>
+        <option
+          children="Female"
+          value="FEMALE"
+          {...getOverrideProps(overrides, "sexoption1")}
+        ></option>
+        <option
+          children="Other"
+          value="OTHER"
+          {...getOverrideProps(overrides, "sexoption2")}
+        ></option>
+      </SelectField>
       <ArrayField
+        lengthLimit={1}
         onChange={async (items) => {
-          let values = items;
+          let value = items[0];
           if (onChange) {
             const modelFields = {
-              address,
-              price,
-              image_url,
-              tags,
-              People: values,
+              name,
+              sex,
+              Home: value,
+              image,
             };
             const result = onChange(modelFields);
-            values = result?.People ?? values;
+            value = result?.Home ?? value;
           }
-          setPeople(values);
-          setCurrentPeopleValue(undefined);
-          setCurrentPeopleDisplayValue("");
+          setHome(value);
+          setCurrentHomeValue(undefined);
+          setCurrentHomeDisplayValue("");
         }}
-        currentFieldValue={currentPeopleValue}
-        label={"People"}
-        items={People}
-        hasError={errors?.People?.hasError}
+        currentFieldValue={currentHomeValue}
+        label={"Home"}
+        items={Home ? [Home] : []}
+        hasError={errors?.Home?.hasError}
         runValidationTasks={async () =>
-          await runValidationTasks("People", currentPeopleValue)
+          await runValidationTasks("Home", currentHomeValue)
         }
-        errorMessage={errors?.People?.errorMessage}
-        getBadgeText={getDisplayValue.People}
+        errorMessage={errors?.Home?.errorMessage}
+        getBadgeText={getDisplayValue.Home}
         setFieldValue={(model) => {
-          setCurrentPeopleDisplayValue(
-            model ? getDisplayValue.People(model) : ""
-          );
-          setCurrentPeopleValue(model);
+          setCurrentHomeDisplayValue(model ? getDisplayValue.Home(model) : "");
+          setCurrentHomeValue(model);
         }}
-        inputFieldRef={PeopleRef}
+        inputFieldRef={HomeRef}
         defaultFieldValue={""}
       >
         <Autocomplete
-          label="People"
+          label="Home"
           isRequired={false}
           isReadOnly={false}
-          placeholder="Search People"
-          value={currentPeopleDisplayValue}
-          options={peopleRecords
-            .filter((r) => !PeopleIdSet.has(getIDValue.People?.(r)))
+          placeholder="Search Home"
+          value={currentHomeDisplayValue}
+          options={homeRecords
+            .filter((r) => !HomeIdSet.has(getIDValue.Home?.(r)))
             .map((r) => ({
-              id: getIDValue.People?.(r),
-              label: getDisplayValue.People?.(r),
+              id: getIDValue.Home?.(r),
+              label: getDisplayValue.Home?.(r),
             }))}
           onSelect={({ id, label }) => {
-            setCurrentPeopleValue(
-              peopleRecords.find((r) =>
+            setCurrentHomeValue(
+              homeRecords.find((r) =>
                 Object.entries(JSON.parse(id)).every(
                   ([key, value]) => r[key] === value
                 )
               )
             );
-            setCurrentPeopleDisplayValue(label);
-            runValidationTasks("People", label);
+            setCurrentHomeDisplayValue(label);
+            runValidationTasks("Home", label);
           }}
           onClear={() => {
-            setCurrentPeopleDisplayValue("");
+            setCurrentHomeDisplayValue("");
           }}
+          defaultValue={Home}
           onChange={(e) => {
             let { value } = e.target;
-            if (errors.People?.hasError) {
-              runValidationTasks("People", value);
+            if (errors.Home?.hasError) {
+              runValidationTasks("Home", value);
             }
-            setCurrentPeopleDisplayValue(value);
-            setCurrentPeopleValue(undefined);
+            setCurrentHomeDisplayValue(value);
+            setCurrentHomeValue(undefined);
           }}
-          onBlur={() => runValidationTasks("People", currentPeopleDisplayValue)}
-          errorMessage={errors.People?.errorMessage}
-          hasError={errors.People?.hasError}
-          ref={PeopleRef}
+          onBlur={() => runValidationTasks("Home", currentHomeDisplayValue)}
+          errorMessage={errors.Home?.errorMessage}
+          hasError={errors.Home?.hasError}
+          ref={HomeRef}
           labelHidden={true}
-          {...getOverrideProps(overrides, "People")}
+          {...getOverrideProps(overrides, "Home")}
         ></Autocomplete>
       </ArrayField>
+      <TextField
+        label="Image"
+        isRequired={false}
+        isReadOnly={false}
+        value={image}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              name,
+              sex,
+              Home,
+              image: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.image ?? value;
+          }
+          if (errors.image?.hasError) {
+            runValidationTasks("image", value);
+          }
+          setImage(value);
+        }}
+        onBlur={() => runValidationTasks("image", image)}
+        errorMessage={errors.image?.errorMessage}
+        hasError={errors.image?.hasError}
+        {...getOverrideProps(overrides, "image")}
+      ></TextField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}
       >
         <Button
-          children="Clear"
+          children="Reset"
           type="reset"
           onClick={(event) => {
             event.preventDefault();
             resetStateValues();
           }}
-          {...getOverrideProps(overrides, "ClearButton")}
+          isDisabled={!(idProp || peopleModelProp)}
+          {...getOverrideProps(overrides, "ResetButton")}
         ></Button>
         <Flex
-          gap={tokens.space.medium.value}
+          gap="15px"
           {...getOverrideProps(overrides, "RightAlignCTASubFlex")}
         >
           <Button
             children="Submit"
             type="submit"
             variation="primary"
-            isDisabled={Object.values(errors).some((e) => e?.hasError)}
+            isDisabled={
+              !(idProp || peopleModelProp) ||
+              Object.values(errors).some((e) => e?.hasError)
+            }
             {...getOverrideProps(overrides, "SubmitButton")}
           ></Button>
         </Flex>

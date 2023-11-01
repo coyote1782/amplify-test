@@ -7,6 +7,7 @@
 /* eslint-disable */
 import * as React from "react";
 import {
+  Autocomplete,
   Badge,
   Button,
   Divider,
@@ -18,9 +19,13 @@ import {
   TextField,
   useTheme,
 } from "@aws-amplify/ui-react";
-import { getOverrideProps } from "@aws-amplify/ui-react/internal";
-import { Home } from "../models";
-import { fetchByPath, validateField } from "./utils";
+import { Home, People as People0 } from "../models";
+import {
+  fetchByPath,
+  getOverrideProps,
+  useDataStoreBinding,
+  validateField,
+} from "./utils";
 import { DataStore } from "aws-amplify";
 function ArrayField({
   items = [],
@@ -194,41 +199,70 @@ export default function HomeUpdateForm(props) {
     price: "",
     image_url: "",
     tags: [],
+    People: [],
   };
   const [address, setAddress] = React.useState(initialValues.address);
   const [price, setPrice] = React.useState(initialValues.price);
   const [image_url, setImage_url] = React.useState(initialValues.image_url);
   const [tags, setTags] = React.useState(initialValues.tags);
+  const [People, setPeople] = React.useState(initialValues.People);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = homeRecord
-      ? { ...initialValues, ...homeRecord }
+      ? { ...initialValues, ...homeRecord, People: linkedPeople }
       : initialValues;
     setAddress(cleanValues.address);
     setPrice(cleanValues.price);
     setImage_url(cleanValues.image_url);
     setTags(cleanValues.tags ?? []);
     setCurrentTagsValue("");
+    setPeople(cleanValues.People ?? []);
+    setCurrentPeopleValue(undefined);
+    setCurrentPeopleDisplayValue("");
     setErrors({});
   };
   const [homeRecord, setHomeRecord] = React.useState(homeModelProp);
+  const [linkedPeople, setLinkedPeople] = React.useState([]);
+  const canUnlinkPeople = true;
   React.useEffect(() => {
     const queryData = async () => {
       const record = idProp
         ? await DataStore.query(Home, idProp)
         : homeModelProp;
       setHomeRecord(record);
+      const linkedPeople = record ? await record.People.toArray() : [];
+      setLinkedPeople(linkedPeople);
     };
     queryData();
   }, [idProp, homeModelProp]);
-  React.useEffect(resetStateValues, [homeRecord]);
+  React.useEffect(resetStateValues, [homeRecord, linkedPeople]);
   const [currentTagsValue, setCurrentTagsValue] = React.useState("");
   const tagsRef = React.createRef();
+  const [currentPeopleDisplayValue, setCurrentPeopleDisplayValue] =
+    React.useState("");
+  const [currentPeopleValue, setCurrentPeopleValue] = React.useState(undefined);
+  const PeopleRef = React.createRef();
+  const getIDValue = {
+    People: (r) => JSON.stringify({ id: r?.id }),
+  };
+  const PeopleIdSet = new Set(
+    Array.isArray(People)
+      ? People.map((r) => getIDValue.People?.(r))
+      : getIDValue.People?.(People)
+  );
+  const peopleRecords = useDataStoreBinding({
+    type: "collection",
+    model: People0,
+  }).items;
+  const getDisplayValue = {
+    People: (r) => `${r?.name ? r?.name + " - " : ""}${r?.id}`,
+  };
   const validations = {
     address: [],
     price: [],
     image_url: [],
     tags: [],
+    People: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -260,19 +294,28 @@ export default function HomeUpdateForm(props) {
           price,
           image_url,
           tags,
+          People,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
             if (Array.isArray(modelFields[fieldName])) {
               promises.push(
                 ...modelFields[fieldName].map((item) =>
-                  runValidationTasks(fieldName, item)
+                  runValidationTasks(
+                    fieldName,
+                    item,
+                    getDisplayValue[fieldName]
+                  )
                 )
               );
               return promises;
             }
             promises.push(
-              runValidationTasks(fieldName, modelFields[fieldName])
+              runValidationTasks(
+                fieldName,
+                modelFields[fieldName],
+                getDisplayValue[fieldName]
+              )
             );
             return promises;
           }, [])
@@ -289,11 +332,62 @@ export default function HomeUpdateForm(props) {
               modelFields[key] = null;
             }
           });
-          await DataStore.save(
-            Home.copyOf(homeRecord, (updated) => {
-              Object.assign(updated, modelFields);
-            })
+          const promises = [];
+          const peopleToLink = [];
+          const peopleToUnLink = [];
+          const peopleSet = new Set();
+          const linkedPeopleSet = new Set();
+          People.forEach((r) => peopleSet.add(getIDValue.People?.(r)));
+          linkedPeople.forEach((r) =>
+            linkedPeopleSet.add(getIDValue.People?.(r))
           );
+          linkedPeople.forEach((r) => {
+            if (!peopleSet.has(getIDValue.People?.(r))) {
+              peopleToUnLink.push(r);
+            }
+          });
+          People.forEach((r) => {
+            if (!linkedPeopleSet.has(getIDValue.People?.(r))) {
+              peopleToLink.push(r);
+            }
+          });
+          peopleToUnLink.forEach((original) => {
+            if (!canUnlinkPeople) {
+              throw Error(
+                `People ${original.id} cannot be unlinked from Home because undefined is a required field.`
+              );
+            }
+            promises.push(
+              DataStore.save(
+                People0.copyOf(original, (updated) => {
+                  updated.Home = null;
+                })
+              )
+            );
+          });
+          peopleToLink.forEach((original) => {
+            promises.push(
+              DataStore.save(
+                People0.copyOf(original, (updated) => {
+                  updated.Home = homeRecord;
+                })
+              )
+            );
+          });
+          const modelFieldsToSave = {
+            address: modelFields.address,
+            price: modelFields.price,
+            image_url: modelFields.image_url,
+            tags: modelFields.tags,
+          };
+          promises.push(
+            DataStore.save(
+              Home.copyOf(homeRecord, (updated) => {
+                Object.assign(updated, modelFieldsToSave);
+              })
+            )
+          );
+          await Promise.all(promises);
           if (onSuccess) {
             onSuccess(modelFields);
           }
@@ -319,6 +413,7 @@ export default function HomeUpdateForm(props) {
               price,
               image_url,
               tags,
+              People,
             };
             const result = onChange(modelFields);
             value = result?.address ?? value;
@@ -350,6 +445,7 @@ export default function HomeUpdateForm(props) {
               price: value,
               image_url,
               tags,
+              People,
             };
             const result = onChange(modelFields);
             value = result?.price ?? value;
@@ -377,6 +473,7 @@ export default function HomeUpdateForm(props) {
               price,
               image_url: value,
               tags,
+              People,
             };
             const result = onChange(modelFields);
             value = result?.image_url ?? value;
@@ -400,6 +497,7 @@ export default function HomeUpdateForm(props) {
               price,
               image_url,
               tags: values,
+              People,
             };
             const result = onChange(modelFields);
             values = result?.tags ?? values;
@@ -438,6 +536,84 @@ export default function HomeUpdateForm(props) {
           labelHidden={true}
           {...getOverrideProps(overrides, "tags")}
         ></TextField>
+      </ArrayField>
+      <ArrayField
+        onChange={async (items) => {
+          let values = items;
+          if (onChange) {
+            const modelFields = {
+              address,
+              price,
+              image_url,
+              tags,
+              People: values,
+            };
+            const result = onChange(modelFields);
+            values = result?.People ?? values;
+          }
+          setPeople(values);
+          setCurrentPeopleValue(undefined);
+          setCurrentPeopleDisplayValue("");
+        }}
+        currentFieldValue={currentPeopleValue}
+        label={"People"}
+        items={People}
+        hasError={errors?.People?.hasError}
+        runValidationTasks={async () =>
+          await runValidationTasks("People", currentPeopleValue)
+        }
+        errorMessage={errors?.People?.errorMessage}
+        getBadgeText={getDisplayValue.People}
+        setFieldValue={(model) => {
+          setCurrentPeopleDisplayValue(
+            model ? getDisplayValue.People(model) : ""
+          );
+          setCurrentPeopleValue(model);
+        }}
+        inputFieldRef={PeopleRef}
+        defaultFieldValue={""}
+      >
+        <Autocomplete
+          label="People"
+          isRequired={false}
+          isReadOnly={false}
+          placeholder="Search People"
+          value={currentPeopleDisplayValue}
+          options={peopleRecords
+            .filter((r) => !PeopleIdSet.has(getIDValue.People?.(r)))
+            .map((r) => ({
+              id: getIDValue.People?.(r),
+              label: getDisplayValue.People?.(r),
+            }))}
+          onSelect={({ id, label }) => {
+            setCurrentPeopleValue(
+              peopleRecords.find((r) =>
+                Object.entries(JSON.parse(id)).every(
+                  ([key, value]) => r[key] === value
+                )
+              )
+            );
+            setCurrentPeopleDisplayValue(label);
+            runValidationTasks("People", label);
+          }}
+          onClear={() => {
+            setCurrentPeopleDisplayValue("");
+          }}
+          onChange={(e) => {
+            let { value } = e.target;
+            if (errors.People?.hasError) {
+              runValidationTasks("People", value);
+            }
+            setCurrentPeopleDisplayValue(value);
+            setCurrentPeopleValue(undefined);
+          }}
+          onBlur={() => runValidationTasks("People", currentPeopleDisplayValue)}
+          errorMessage={errors.People?.errorMessage}
+          hasError={errors.People?.hasError}
+          ref={PeopleRef}
+          labelHidden={true}
+          {...getOverrideProps(overrides, "People")}
+        ></Autocomplete>
       </ArrayField>
       <Flex
         justifyContent="space-between"
