@@ -1,0 +1,14 @@
+{
+  "resourceName": "s3ykucteststorage0d8c33e1",
+  "bucketName": "ykuc-test-storage-0d8c33e1",
+  "policyUUID": "b5761c91",
+  "storageAccess": "authAndGuest",
+  "guestAccess": [
+    "CREATE_AND_UPDATE"
+  ],
+  "authAccess": [
+    "READ",
+    "CREATE_AND_UPDATE",
+    "DELETE"
+  ]
+}
